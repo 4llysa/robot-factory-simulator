@@ -40,8 +40,8 @@ public class SimulatorApplication {
 
 		final Room room2 = new Room(factory, new RectangularShape( 120, 22, 75, 75 ), "Production Room 2");
 		new Door(room2, Room.WALL.LEFT, 10, 20, true, "Entrance");
-		final Area area2 = new Area(room2, new RectangularShape( 135, 35, 50, 50 ), "Production Area 1");
-		final Machine machine2 = new Machine(area2, new RectangularShape( 150, 50, 15, 15 ), "Machine 1");
+		final Area area2 = new Area(room2, new RectangularShape( 135, 35, 50, 50 ), "Production Area 2");
+		final Machine machine2 = new Machine(area2, new RectangularShape( 150, 50, 15, 15 ), "Machine 2");
 		
 		final int baselineSize = 3;
 		final int xCoordinate = 10;
@@ -71,11 +71,13 @@ public class SimulatorApplication {
 
 		final FactoryPathFinder customPathFinder = new CustomDijkstraFactoryPathFinder(factory, 5);
 		final Robot robot2 = new Robot(factory, customPathFinder, new CircularShape(45, 5, 2), new Battery(10), "Robot 2");
-		robot2.addTargetComponent(chargingStation);
 		robot2.addTargetComponent(machine1);
 		robot2.addTargetComponent(machine2);
+		robot2.addTargetComponent(machine1);
+		robot2.addTargetComponent(machine2);
+        robot2.addTargetComponent(chargingStation);
 		robot2.addTargetComponent(new Conveyor(factory, conveyorShape, "Conveyor 1"));
-		
+
 		SwingUtilities.invokeLater(new Runnable() {
 			  
 			@Override

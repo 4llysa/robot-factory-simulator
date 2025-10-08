@@ -107,6 +107,8 @@ public class Robot extends Component {
 			computePathToCurrentTargetComponent();
 		}
 
+		System.out.println(getName() + ": " + currTargetComponent.getName());
+
 		return moveToNextPathPosition() != 0;
 	}
 		
@@ -120,12 +122,48 @@ public class Robot extends Component {
 	
 	private int moveToNextPathPosition() {
 		final Motion motion = computeMotion();
-		
-		final int displacement = motion == null ? 0 : motion.moveToTarget();
-			
-		notifyObservers();
-		
+		final int displacement = motion == null ? 0 : getFactory().moveComponent(motion, this);
+		if (displacement != 0) {
+			notifyObservers();
+			return displacement;
+		} else if (isLivelyLocked()) {
+			final Position freeNeighbouringPosition = findFreeNeighbouringPosition();
+			if (freeNeighbouringPosition != null) {
+				Motion evasiveMotion = new Motion(getPosition(), freeNeighbouringPosition);
+				getFactory().moveComponent(evasiveMotion, this);
+				notifyObservers();
+				computePathToCurrentTargetComponent();
+			}
+		}
 		return displacement;
+	}
+
+	private Position findFreeNeighbouringPosition() {
+		Position currPosition = getPosition();
+		int xCoord = currPosition.getxCoordinate();
+		int yCoord = currPosition.getyCoordinate();
+		int[][] directions = {
+				{-5, 0},
+				{0, 5},
+				{5, 0},
+				{0, -5}
+		};
+
+		for (int[] direction : directions) {
+			int dX = direction[0];
+			int dY = direction[1];
+
+			Position newPosition = new Position(xCoord + dX, yCoord + dY);
+
+			if (getFactory().getMobileComponentAt(newPosition, this) == null) {
+				return newPosition;
+			}
+
+//			if (!getFactory().hasObstacleAt(newPosition)) {
+//				return newPosition;
+//			}
+		}
+		return null;
 	}
 	
 	private void computePathToCurrentTargetComponent() {
@@ -178,9 +216,10 @@ public class Robot extends Component {
 	                                                                   this);
 
 	    if (otherComponent instanceof Robot)  {
-		    return getPosition().equals(((Robot) otherComponent).getMemorizedTargetPosition());
+		    boolean ret = getPosition().equals(((Robot) otherComponent).getMemorizedTargetPosition()) || ((Robot) otherComponent).blocked;
+			if (ret) System.out.println(getName() + " is livelocked");
+			return ret;
 	    }
-	    
 	    return false;
 	}
 

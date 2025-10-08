@@ -23,6 +23,7 @@ public class Motion {
 	}
 	
 	public int moveToTarget() {
+		System.out.println("hi");
 		final int xDisplacement = Math.abs(targetPosition.getxCoordinate() - currentPosition.getxCoordinate());
 		final int yDisplacement = Math.abs(targetPosition.getyCoordinate() - currentPosition.getyCoordinate());
 		final int displacement = (int) Math.round(Math.sqrt(xDisplacement * xDisplacement + yDisplacement * yDisplacement));
@@ -30,6 +31,17 @@ public class Motion {
 		currentPosition.setxCoordinate(targetPosition.getxCoordinate());
 		currentPosition.setyCoordinate(targetPosition.getyCoordinate());
 		
+		return displacement;
+	}
+
+	public int moveToPosition(Position targetPosition) {
+		final int xDisplacement = Math.abs(targetPosition.getxCoordinate() - currentPosition.getxCoordinate());
+		final int yDisplacement = Math.abs(targetPosition.getyCoordinate() - currentPosition.getyCoordinate());
+		final int displacement = (int) Math.round(Math.sqrt(xDisplacement * xDisplacement + yDisplacement * yDisplacement));
+
+		currentPosition.setxCoordinate(targetPosition.getxCoordinate());
+		currentPosition.setyCoordinate(targetPosition.getyCoordinate());
+
 		return displacement;
 	}
 }

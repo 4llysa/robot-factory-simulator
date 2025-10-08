@@ -9,6 +9,7 @@ import fr.tp.inf112.projects.canvas.controller.Observer;
 import fr.tp.inf112.projects.canvas.model.Canvas;
 import fr.tp.inf112.projects.canvas.model.Figure;
 import fr.tp.inf112.projects.canvas.model.Style;
+import fr.tp.inf112.projects.robotsim.model.motion.Motion;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
 import fr.tp.inf112.projects.robotsim.model.shapes.RectangularShape;
 
@@ -82,6 +83,7 @@ public class Factory extends Component implements Canvas, Observable {
 	protected List<Component> getComponents() {
 		return components;
 	}
+	protected List<Thread> threads = new ArrayList<>();
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
@@ -102,17 +104,18 @@ public class Factory extends Component implements Canvas, Observable {
 		if (!isSimulationStarted()) {
 			this.simulationStarted = true;
 			notifyObservers();
+			behave();
 
-			while (isSimulationStarted()) {
-				behave();
-				
-				try {
-					Thread.sleep(100);
-				}
-				catch (final InterruptedException ex) {
-					System.err.println("Simulation was abruptely interrupted");
-				}
-			}
+//			while (isSimulationStarted()) {
+//				behave();
+//
+//				try {
+//					Thread.sleep(100);
+//				}
+//				catch (final InterruptedException ex) {
+//					System.err.println("Simulation was abruptely interrupted");
+//				}
+//			}
 		}
 	}
 
@@ -126,13 +129,16 @@ public class Factory extends Component implements Canvas, Observable {
 
 	@Override
 	public boolean behave() {
-		boolean behaved = true;
-		
+		boolean behaved = true; // not referenced in
 		for (final Component component : getComponents()) {
 			behaved = component.behave() || behaved;
+			Thread t = new Thread(component, component.getName() + "-Thread");
+			t.start();
+			threads.add(t);
+			System.out.println("Started Thread for " + t.getName());
 		}
 		
-		return behaved;
+		return true;
 	}
 	
 	@Override
@@ -148,6 +154,9 @@ public class Factory extends Component implements Canvas, Observable {
 		}
 		
 		return false;
+	}
+	public boolean hasObstacleAt(final Position position) {
+		return hasObstacleAt(new RectangularShape(position.getxCoordinate(), position.getyCoordinate(), 2, 2));
 	}
 	
 	public boolean hasMobileComponentAt(final PositionedShape shape,
@@ -183,5 +192,14 @@ public class Factory extends Component implements Canvas, Observable {
 		}
 		
 		return null;
+	}
+
+	public synchronized int moveComponent(final Motion motion, final Component componentToMove) {
+		if (hasObstacleAt(motion.getTargetPosition()) || getMobileComponentAt(motion.getTargetPosition(), componentToMove) != null) {
+			System.err.println("can't move");
+			return 0;
+		}
+
+		return motion.moveToTarget();
 	}
 }

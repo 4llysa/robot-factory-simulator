@@ -6,9 +6,10 @@ import fr.tp.inf112.projects.canvas.model.Figure;
 import fr.tp.inf112.projects.canvas.model.Style;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
 import fr.tp.inf112.projects.canvas.model.Shape;
+import static java.lang.Thread.sleep;
 
-public abstract class Component implements Figure, Serializable {
-	
+public abstract class Component implements Figure, Serializable, Runnable {
+
 	private static final long serialVersionUID = -5960950869184030220L;
 
 	private String id;
@@ -30,7 +31,18 @@ public abstract class Component implements Figure, Serializable {
 			factory.addComponent(this);
 		}
 	}
-	
+	@Override
+	public void run() {
+		while (isSimulationStarted()) {
+			behave();
+			try {
+				sleep(100);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
 	public String getId() {
 		return id;
 	}
