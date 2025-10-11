@@ -30,9 +30,9 @@ public class FactoryPersistenceManager extends AbstractCanvasPersistenceManager 
 		try (
 			final InputStream fileInputStream = new FileInputStream(canvasId);
 			final InputStream bufInputStream = new BufferedInputStream(fileInputStream);
-			final ObjectInputStream objectInputStrteam = new ObjectInputStream(bufInputStream);
+			final ObjectInputStream objectInputStream = new ObjectInputStream(bufInputStream);
 		) {
-			return (Canvas) objectInputStrteam.readObject();
+			return (Canvas) objectInputStream.readObject();
 		}
 		catch (ClassNotFoundException | IOException ex) {
 			throw new IOException(ex);

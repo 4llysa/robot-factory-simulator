@@ -107,7 +107,7 @@ public class Robot extends Component {
 			computePathToCurrentTargetComponent();
 		}
 
-		System.out.println(getName() + ": " + currTargetComponent.getName());
+		LOGGER.info(getName() + ": " + currTargetComponent.getName());
 
 		return moveToNextPathPosition() != 0;
 	}

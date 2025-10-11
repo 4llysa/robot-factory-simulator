@@ -83,7 +83,7 @@ public class Factory extends Component implements Canvas, Observable {
 	protected List<Component> getComponents() {
 		return components;
 	}
-	protected List<Thread> threads = new ArrayList<>();
+	protected transient List<Thread> threads = new ArrayList<>();
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
@@ -135,7 +135,7 @@ public class Factory extends Component implements Canvas, Observable {
 			Thread t = new Thread(component, component.getName() + "-Thread");
 			t.start();
 			threads.add(t);
-			System.out.println("Started Thread for " + t.getName());
+			LOGGER.info("Started Thread for " + t.getName());
 		}
 		
 		return true;
