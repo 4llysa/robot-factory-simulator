@@ -1,9 +1,7 @@
 package fr.tp.inf112.projects.robotsim.app;
 
 import java.awt.*;
-import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.logging.Logger;
@@ -17,7 +15,6 @@ import fr.tp.inf112.projects.canvas.view.FileCanvasChooser;
 import fr.tp.inf112.projects.robotsim.model.Area;
 import fr.tp.inf112.projects.robotsim.model.Battery;
 import fr.tp.inf112.projects.robotsim.model.ChargingStation;
-//import fr.tp.inf112.projects.robotsim.model.Component;
 import fr.tp.inf112.projects.robotsim.model.Conveyor;
 import fr.tp.inf112.projects.robotsim.model.Door;
 import fr.tp.inf112.projects.robotsim.model.Factory;
@@ -93,16 +90,14 @@ public class SimulatorApplication {
 	        public void run() {
 				final FileCanvasChooser canvasChooser = new FileCanvasChooser("factory", "Puck Factory");
 				InetAddress netAddr;
-				int port = 13;
+				int port = 666;
 				try {
 					netAddr = InetAddress.getByName("localhost");
 				} catch (UnknownHostException e) {
 					throw new RuntimeException(e);
 				}
-//				final Component factoryViewer = new CanvasViewer(new SimulatorController(factory, new RemoteFactoryPersistenceManager(canvasChooser, netAddr, port)));
-				final Component factoryViewer = new CanvasViewer(new SimulatorController(factory, new FactoryPersistenceManager(canvasChooser)));
+				final Component factoryViewer = new CanvasViewer(new SimulatorController(factory, new RemoteFactoryPersistenceManager(canvasChooser, netAddr, port)));
 				canvasChooser.setViewer(factoryViewer);
-				//new CanvasViewer(factory);
 			}
 		});
 	}

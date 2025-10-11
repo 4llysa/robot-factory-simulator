@@ -37,7 +37,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="graph.jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/libs/graph.jar!/" />
@@ -46,25 +46,14 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
-      <library name="canvas-viewer.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/canvas-viewer.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/libs/canvas-viewer.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/canvas-viewer.jar!/" />
+          <root url="jar://$MODULE_DIR$/libs/canvas-viewer.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/Downloads/canvas-viewer.jar!/" />
+          <root url="jar://$MODULE_DIR$/libs/canvas-viewer.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
