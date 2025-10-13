@@ -1,13 +1,14 @@
 package fr.tp.inf112.projects.robotsim.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.logging.Logger;
 
 import com.sun.tools.javac.Main;
 import fr.tp.inf112.projects.canvas.model.Figure;
+import fr.tp.inf112.projects.canvas.model.Shape;
 import fr.tp.inf112.projects.canvas.model.Style;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
-import fr.tp.inf112.projects.canvas.model.Shape;
 import static java.lang.Thread.sleep;
 
 public abstract class Component implements Figure, Serializable, Runnable {
@@ -21,7 +22,7 @@ public abstract class Component implements Figure, Serializable, Runnable {
 	private final PositionedShape positionedShape;
 	
 	private final String name;
-	protected transient final Logger LOGGER = Logger.getLogger(Main.class.getName());
+	protected transient Logger LOGGER = Logger.getLogger(Main.class.getName());
 
 	protected Component(final Factory factory,
 						final PositionedShape shape,
@@ -150,5 +151,9 @@ public abstract class Component implements Figure, Serializable, Runnable {
 	
 	public boolean isSimulationStarted() {
 		return getFactory().isSimulationStarted();
+	}
+	@Serial
+	protected void restoreTransientFields() {
+		LOGGER = Logger.getLogger(Main.class.getName());
 	}
 }

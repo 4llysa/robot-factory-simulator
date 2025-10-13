@@ -1,5 +1,8 @@
 package fr.tp.inf112.projects.robotsim.model;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -172,6 +175,7 @@ public class Robot extends Component {
 	}
 	
 	private Motion computeMotion() {
+		if (currentPathPositionsIter == null) computePathToCurrentTargetComponent();
 		if (!currentPathPositionsIter.hasNext()) {
 
 			// There is no free path to the target
@@ -235,5 +239,18 @@ public class Robot extends Component {
 	@Override
 	public Style getStyle() {
 		return blocked ? BLOCKED_STYLE : STYLE;
+	}
+
+	@Serial
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+
+		// restore superclass transient fields
+		restoreTransientFields();
+
+		// restore Robot-specific transient fields
+		if (targetComponentsIterator == null && targetComponents != null) {
+			targetComponentsIterator = targetComponents.iterator();
+		}
 	}
 }
