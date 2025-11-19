@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import fr.tp.inf112.projects.canvas.controller.Observable;
 import fr.tp.inf112.projects.canvas.controller.Observer;
 import fr.tp.inf112.projects.canvas.model.Canvas;
@@ -22,8 +25,10 @@ public class Factory extends Component implements Canvas, Observable {
 
 	private static final ComponentStyle DEFAULT = new ComponentStyle(5.0f);
 
-    private final List<Component> components;
+	@JsonManagedReference("factory-components")
+	private final List<Component> components;
 
+	@JsonIgnore
 	private transient List<Observer> observers;
 
 	private transient boolean simulationStarted;
@@ -38,6 +43,9 @@ public class Factory extends Component implements Canvas, Observable {
 		simulationStarted = false;
 	}
 
+	public Factory() {
+		this(-1, -1, null);
+	}
 	protected List<Observer> getObservers() {
 		if (observers == null) {
 			observers = new ArrayList<>();
@@ -85,8 +93,10 @@ public class Factory extends Component implements Canvas, Observable {
 	protected List<Component> getComponents() {
 		return components;
 	}
+	@JsonIgnore
 	protected transient List<Thread> threads = new ArrayList<>();
 
+	@JsonIgnore
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Collection<Figure> getFigures() {
@@ -98,35 +108,28 @@ public class Factory extends Component implements Canvas, Observable {
 		return super.toString() + " components=" + components + "]";
 	}
 
+	@JsonGetter("simulationStarted")
 	public boolean isSimulationStarted() {
 		return simulationStarted;
 	}
 
 	public void startSimulation() {
 		if (!isSimulationStarted()) {
+			LOGGER.info("Starting simulation of " + this.getName());
 			this.simulationStarted = true;
 			notifyObservers();
 			behave();
-
-//			while (isSimulationStarted()) {
-//				behave();
-//
-//				try {
-//					Thread.sleep(100);
-//				}
-//				catch (final InterruptedException ex) {
-//					System.err.println("Simulation was abruptely interrupted");
-//				}
-//			}
 		}
+		else LOGGER.info("Simulation of " + this.getName() + " already started");
 	}
 
 	public void stopSimulation() {
 		if (isSimulationStarted()) {
 			this.simulationStarted = false;
-
 			notifyObservers();
+			LOGGER.info("Simulation of " + this.getName() + " ended");
 		}
+		else LOGGER.info("Simulation of " + this.getName() + " not started");
 	}
 
 	@Override
@@ -143,6 +146,7 @@ public class Factory extends Component implements Canvas, Observable {
 		return true;
 	}
 
+	@JsonIgnore
 	@Override
 	public Style getStyle() {
 		return DEFAULT;

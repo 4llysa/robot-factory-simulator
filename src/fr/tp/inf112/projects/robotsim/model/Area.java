@@ -1,31 +1,43 @@
 package fr.tp.inf112.projects.robotsim.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import fr.tp.inf112.projects.canvas.model.Style;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
 import fr.tp.inf112.projects.robotsim.model.shapes.RectangularShape;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Area extends Component {
-	
+
 	private static final long serialVersionUID = 5022214804847296168L;
 
+	@JsonIgnore
 	private static final Style STYLE = new ComponentStyle( ComponentStyle.DEFAULT_DASH_PATTERN );
-	
+
 	private Machine machine;
+	@JsonBackReference("room-areas")
+	private Room room;
 	
 	public Area(final Room room,
 				final RectangularShape shape,
 				final String name) {
 		super(room.getFactory(), shape, name);
-		
+		this.room = room;
 		room.addArea(this);
 		
 		machine = null;
 	}
-	
+	public Area() {
+		super(null, null, null);
+		this.room = room;
+		machine = null;
+	}
+
 	protected void setMachine( final Machine machine ) {
 		this.machine = machine;
 	}
-	
+
 	@Override
 	public boolean canBeOverlayed(final PositionedShape shape) {
 		return true;
@@ -35,7 +47,8 @@ public class Area extends Component {
 	public String toString() {
 		return super.toString() + " machine=" + machine + "]";
 	}
-	
+
+	@JsonIgnore
 	@Override
 	public Style getStyle() {
 		return STYLE;

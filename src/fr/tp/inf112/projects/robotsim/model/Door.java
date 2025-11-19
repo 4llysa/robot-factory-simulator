@@ -1,10 +1,13 @@
 package fr.tp.inf112.projects.robotsim.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import fr.tp.inf112.projects.canvas.model.Style;
 import fr.tp.inf112.projects.canvas.model.impl.RGBColor;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
 import fr.tp.inf112.projects.robotsim.model.shapes.RectangularShape;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Door extends Component {
 
 	private static final long serialVersionUID = 4038942468211075735L;
@@ -14,6 +17,7 @@ public class Door extends Component {
 	private static int computexCoordinate(final Room room,
 										  final Room.WALL wall,
 										  final int offset) {
+		if (wall == null || room == null || wall == null) return -1;
 		switch (wall) {
 			case BOTTOM: 
 			case TOP: {
@@ -36,6 +40,8 @@ public class Door extends Component {
 	private static int computeyCoordinate(final Room room,
 										  final Room.WALL wall,
 										  final int offset) {
+		if (wall == null || room == null || wall == null) return -1;
+
 		switch (wall) {
 			case LEFT: 
 			case RIGHT: {
@@ -59,6 +65,7 @@ public class Door extends Component {
 											   final Room.WALL wall,
 											   final int offset,
 											   final int doorWidth ) {
+		if (wall == null || wall == null || doorWidth == -1 || offset == -1) return null;
 		final int xCoordinate = computexCoordinate(room, wall, offset);
 		final int yCoordinate = computeyCoordinate(room, wall, offset);
 		
@@ -89,7 +96,14 @@ public class Door extends Component {
 		this.room.addDoor(this);
 		this.open = open;
 	}
-	
+
+	public Door() {
+		super(null,
+				createShape(null, null, -1, -1),
+				null);
+		this.room = null;
+	}
+	@JsonIgnore
 	@Override
 	public Style getStyle() {
 		return isOpen() ? OPEN_STYLE : ComponentStyle.DEFAULT_BLACK;

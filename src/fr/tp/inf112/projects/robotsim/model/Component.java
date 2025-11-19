@@ -4,6 +4,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.logging.Logger;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sun.tools.javac.Main;
 import fr.tp.inf112.projects.canvas.model.Figure;
 import fr.tp.inf112.projects.canvas.model.Shape;
@@ -17,11 +19,13 @@ public abstract class Component implements Figure, Serializable, Runnable {
 
 	private String id;
 
-	private final Factory factory;
-	
-	private final PositionedShape positionedShape;
-	
-	private final String name;
+	@JsonBackReference("factory-components")
+	private Factory factory;
+
+	private PositionedShape positionedShape;
+
+	private String name;
+	@JsonIgnore
 	protected transient Logger LOGGER = Logger.getLogger(Main.class.getName());
 
 	protected Component(final Factory factory,
@@ -34,6 +38,11 @@ public abstract class Component implements Figure, Serializable, Runnable {
 		if (factory != null) {
 			factory.addComponent(this);
 		}
+	}
+	public Component() {
+		this.factory = null;
+		this.positionedShape = null;
+		this.name = null;
 	}
 	@Override
 	public void run() {
@@ -56,49 +65,61 @@ public abstract class Component implements Figure, Serializable, Runnable {
 	}
 
 	public PositionedShape getPositionedShape() {
+//		if (positionedShape == null) LOGGER.severe("Component " + this.name + " has no positioned shape");
 		return positionedShape;
 	}
-	
+
+	@JsonIgnore
 	public Position getPosition() {
-		return getPositionedShape().getPosition();
+		final PositionedShape shape = getPositionedShape();
+		return shape == null ? null : shape.getPosition();
 	}
 
 	protected Factory getFactory() {
 		return factory;
 	}
 
+	@JsonIgnore
 	@Override
 	public int getxCoordinate() {
-		return getPositionedShape().getxCoordinate();
+		final PositionedShape shape = getPositionedShape();
+		return shape == null ? -1 : shape.getxCoordinate();
 	}
 
 	protected boolean setxCoordinate(int xCoordinate) {
-		if ( getPositionedShape().setxCoordinate( xCoordinate ) ) {
+		final PositionedShape shape = getPositionedShape();
+		if (shape == null) return false;
+		if ( shape.setxCoordinate( xCoordinate ) ) {
 			notifyObservers();
-			
+
 			return true;
 		}
-		
+
 		return false;
 	}
 
+	@JsonIgnore
 	@Override
 	public int getyCoordinate() {
-		return getPositionedShape().getyCoordinate();
+		final PositionedShape shape = getPositionedShape();
+		return shape == null ? -1 : shape.getyCoordinate();
 	}
 
 	protected boolean setyCoordinate(final int yCoordinate) {
-		if (getPositionedShape().setyCoordinate(yCoordinate) ) {
+		final PositionedShape shape = getPositionedShape();
+		if (shape == null) return false;
+		if (shape.setyCoordinate(yCoordinate) ) {
 			notifyObservers();
-			
+
 			return true;
 		}
-		
+
 		return false;
 	}
 
 	protected void notifyObservers() {
-		getFactory().notifyObservers();
+		final Factory factory = getFactory();
+		if (factory != null) factory.notifyObservers();
 	}
 
 	public String getName() {
@@ -111,46 +132,58 @@ public abstract class Component implements Figure, Serializable, Runnable {
 				+ ", shape=" + getPositionedShape();
 	}
 
+	@JsonIgnore
 	public int getWidth() {
-		return getPositionedShape().getWidth();
+		final PositionedShape shape = getPositionedShape();
+		if (shape == null) return -1;
+		return shape.getWidth();
 	}
 
+	@JsonIgnore
 	public int getHeight() {
-		return getPositionedShape().getHeight();
+		final PositionedShape shape = getPositionedShape();
+		if (shape == null) return -1;
+		return shape.getHeight();
 	}
-	
+
 	public boolean behave() {
 		return false;
 	}
-	
+
+	@JsonIgnore
 	public boolean isMobile() {
 		return false;
 	}
-	
+
 	public boolean overlays(final Component component) {
 		return overlays(component.getPositionedShape());
 	}
-	
+
 	public boolean overlays(final PositionedShape shape) {
 		return getPositionedShape().overlays(shape);
 	}
-	
+
 	public boolean canBeOverlayed(final PositionedShape shape) {
 		return false;
 	}
-	
+
+	@JsonIgnore
 	@Override
 	public Style getStyle() {
 		return ComponentStyle.DEFAULT;
 	}
-	
+
+	@JsonIgnore
 	@Override
 	public Shape getShape() {
 		return getPositionedShape();
 	}
-	
+
+	@JsonIgnore
 	public boolean isSimulationStarted() {
-		return getFactory().isSimulationStarted();
+		final Factory factory = getFactory();
+		if (factory == null) return false;
+		return factory.isSimulationStarted();
 	}
 	@Serial
 	protected void restoreTransientFields() {

@@ -1,8 +1,10 @@
 package fr.tp.inf112.projects.robotsim.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
 import fr.tp.inf112.projects.robotsim.model.shapes.RectangularShape;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Machine extends Component {
 
 	private static final long serialVersionUID = -1568908860712776436L;
@@ -15,6 +17,10 @@ public class Machine extends Component {
 		area.setMachine(this);
 	}
 
+
+	public Machine() {
+		super(null, null, null);
+	}
 	@Override
 	public String toString() {
 		return super.toString() + "]";

@@ -27,7 +27,7 @@ public class RemoteFactoryPersistenceManager extends AbstractCanvasPersistenceMa
         super(cc);
         this.inetAddress = inetAddress;
         this.port = port;
-        LOGGER.info("hi");
+        LOGGER.info("Remote Factory Persistence Manager instantiated");
     }
 
     /**
@@ -40,6 +40,7 @@ public class RemoteFactoryPersistenceManager extends AbstractCanvasPersistenceMa
              ObjectOutputStream objectOutStream = new ObjectOutputStream(outputStream);
         ) {
             objectOutStream.writeObject(canvasModel);
+            LOGGER.info(canvasModel.getId() + " has been persisted by Remote Persistence Manager");
         }
     }
 
@@ -49,15 +50,16 @@ public class RemoteFactoryPersistenceManager extends AbstractCanvasPersistenceMa
     @Override
     public Canvas read(final String canvasId)
             throws IOException {
-        try ( Socket socket = new Socket(inetAddress, port);
-              PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
-              OutputStream outputStream = socket.getOutputStream();
-              ObjectOutputStream objectOutStream = new ObjectOutputStream(outputStream);
-              InputStream inpStr = socket.getInputStream();
-              ObjectInputStream objInStream = new ObjectInputStream(inpStr);
+        try (Socket socket = new Socket(inetAddress, port);
+             PrintWriter ignored = new PrintWriter(socket.getOutputStream(), true);
+             OutputStream outputStream = socket.getOutputStream();
+             ObjectOutputStream objectOutStream = new ObjectOutputStream(outputStream);
+             InputStream inpStr = socket.getInputStream();
+             ObjectInputStream objInStream = new ObjectInputStream(inpStr);
         ) {
             objectOutStream.writeObject(canvasId);
             Canvas c = (Canvas) objInStream.readObject();
+            LOGGER.info(c.getId() + " has been retrieved by Persistence Manager");
             return c;
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
@@ -71,7 +73,6 @@ public class RemoteFactoryPersistenceManager extends AbstractCanvasPersistenceMa
     public boolean delete(final Canvas canvasModel)
             throws IOException {
         final File canvasFile = new File(canvasModel.getId());
-
         return canvasFile.delete();
     }
 }

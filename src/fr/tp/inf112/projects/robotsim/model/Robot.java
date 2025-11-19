@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import fr.tp.inf112.projects.canvas.model.Style;
 import fr.tp.inf112.projects.canvas.model.impl.RGBColor;
 import fr.tp.inf112.projects.robotsim.model.motion.Motion;
@@ -15,6 +17,7 @@ import fr.tp.inf112.projects.robotsim.model.shapes.CircularShape;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
 import fr.tp.inf112.projects.robotsim.model.shapes.RectangularShape;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Robot extends Component {
 	
 	private static final long serialVersionUID = -1218857231970296747L;
@@ -60,6 +63,10 @@ public class Robot extends Component {
 		memorizedTargetPosition = null;
 	}
 
+	public Robot() {
+		this(null, null, null, null, null);
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + " battery=" + battery + "]";
@@ -92,7 +99,8 @@ public class Robot extends Component {
 	public boolean removeTargetComponent(final Component targetComponent) {
 		return getTargetComponents().remove(targetComponent);
 	}
-	
+
+	@JsonIgnore
 	@Override
 	public boolean isMobile() {
 		return true;
@@ -236,6 +244,7 @@ public class Robot extends Component {
 		return true;
 	}
 	
+	@JsonIgnore
 	@Override
 	public Style getStyle() {
 		return blocked ? BLOCKED_STYLE : STYLE;

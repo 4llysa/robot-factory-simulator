@@ -3,9 +3,12 @@ package fr.tp.inf112.projects.robotsim.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
 import fr.tp.inf112.projects.robotsim.model.shapes.RectangularShape;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Room extends Component {
 	
 	private static final long serialVersionUID = 1449569724908316962L;
@@ -21,7 +24,8 @@ public class Room extends Component {
 	private final PositionedShape topWall;
 	
 	private final PositionedShape bottomWall;
-	
+
+	@JsonManagedReference("room-areas")
 	private final List<Area> areas;
 
 	private final List<Door> doors;
@@ -39,12 +43,17 @@ public class Room extends Component {
 		areas = new ArrayList<>();
 		doors = new ArrayList<>();
 	}
-	
+
+	public Room() {
+		this(null, null, null);
+	}
 	protected boolean addArea(final Area area) {
+		if (area == null) return false;
 		return areas.add(area);
 	}
 	
 	protected boolean addDoor(final Door door) {
+		if (door == null) return false;
 		return doors.add(door);
 	}
 	
