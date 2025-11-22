@@ -2,12 +2,16 @@ package fr.tp.inf112.projects.robotsim.model;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Battery implements Serializable {
 	
 	private static final long serialVersionUID = 5744149485828674046L;
 
-	private final float capacity;
+	@JsonProperty
+	private float capacity;
 	
+	@JsonProperty
 	private float level;
 
 	public Battery(final float capacity) {

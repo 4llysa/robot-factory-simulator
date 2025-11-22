@@ -76,3 +76,4 @@ public class RemoteFactoryPersistenceManager extends AbstractCanvasPersistenceMa
         return canvasFile.delete();
     }
 }
+

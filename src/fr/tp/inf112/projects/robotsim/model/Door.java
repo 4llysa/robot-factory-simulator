@@ -2,6 +2,7 @@ package fr.tp.inf112.projects.robotsim.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.tp.inf112.projects.canvas.model.Style;
 import fr.tp.inf112.projects.canvas.model.impl.RGBColor;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
@@ -76,6 +77,7 @@ public class Door extends Component {
 		return new RectangularShape(xCoordinate, yCoordinate, THICKNESS, doorWidth);
 	}
 	
+	@JsonProperty
 	private boolean open;
 	
 	private final Room room;

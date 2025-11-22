@@ -6,10 +6,13 @@ import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sun.tools.javac.Main;
 import fr.tp.inf112.projects.canvas.controller.Observable;
 import fr.tp.inf112.projects.canvas.controller.Observer;
 import fr.tp.inf112.projects.canvas.model.Canvas;
@@ -24,6 +27,7 @@ public class Factory extends Component implements Canvas, Observable {
 	private static final long serialVersionUID = 5156526483612458192L;
 
 	private static final ComponentStyle DEFAULT = new ComponentStyle(5.0f);
+//	protected transient final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
 	@JsonManagedReference("factory-components")
 	private final List<Component> components;
@@ -31,7 +35,8 @@ public class Factory extends Component implements Canvas, Observable {
 	@JsonIgnore
 	private transient List<Observer> observers;
 
-	private transient boolean simulationStarted;
+	@JsonProperty
+	private boolean simulationStarted;
 
 	public Factory(final int width,
 				   final int height,
@@ -46,7 +51,7 @@ public class Factory extends Component implements Canvas, Observable {
 	public Factory() {
 		this(-1, -1, null);
 	}
-	protected List<Observer> getObservers() {
+	public List<Observer> getObservers() {
 		if (observers == null) {
 			observers = new ArrayList<>();
 		}
@@ -64,7 +69,7 @@ public class Factory extends Component implements Canvas, Observable {
 		return getObservers().remove(observer);
 	}
 
-	protected void notifyObservers() {
+	public void notifyObservers() {
 		for (final Observer observer : getObservers()) {
 			observer.modelChanged();
 		}
@@ -107,29 +112,28 @@ public class Factory extends Component implements Canvas, Observable {
 	public String toString() {
 		return super.toString() + " components=" + components + "]";
 	}
-
-	@JsonGetter("simulationStarted")
 	public boolean isSimulationStarted() {
 		return simulationStarted;
 	}
 
 	public void startSimulation() {
+		LOGGER.info("isSimulationStarted(): " + isSimulationStarted());
 		if (!isSimulationStarted()) {
-			LOGGER.info("Starting simulation of " + this.getName());
+			LOGGER.info("Simulating " + this.getName() + " " + this.getId());
 			this.simulationStarted = true;
 			notifyObservers();
 			behave();
 		}
-		else LOGGER.info("Simulation of " + this.getName() + " already started");
+		else LOGGER.info("Simulation of " + this.getName() + " " + this.getId() + " already started");
 	}
 
 	public void stopSimulation() {
 		if (isSimulationStarted()) {
 			this.simulationStarted = false;
 			notifyObservers();
-			LOGGER.info("Simulation of " + this.getName() + " ended");
+			LOGGER.info("Simulation of " + this.getName() + " " + this.getId() + " ended");
 		}
-		else LOGGER.info("Simulation of " + this.getName() + " not started");
+		else LOGGER.info("Simulation of " + this.getName() + " " + this.getId() + " not started");
 	}
 
 	@Override
@@ -200,7 +204,7 @@ public class Factory extends Component implements Canvas, Observable {
 
 	public synchronized int moveComponent(final Motion motion, final Component componentToMove) {
 		if (hasObstacleAt(motion.getTargetPosition()) || getMobileComponentAt(motion.getTargetPosition(), componentToMove) != null) {
-			System.err.println("can't move");
+			LOGGER.warning("can't move");
 			return 0;
 		}
 

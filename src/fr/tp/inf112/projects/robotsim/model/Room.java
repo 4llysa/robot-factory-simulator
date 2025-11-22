@@ -3,8 +3,11 @@ package fr.tp.inf112.projects.robotsim.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
 import fr.tp.inf112.projects.robotsim.model.shapes.RectangularShape;
 
@@ -17,13 +20,13 @@ public class Room extends Component {
 	
 	private static final int WALL_THICKNESS = 5;
 	
-	private final PositionedShape leftWall;
+	private PositionedShape leftWall;
 	
-	private final PositionedShape rightWall;
+	private PositionedShape rightWall;
 	
-	private final PositionedShape topWall;
+	private PositionedShape topWall;
 	
-	private final PositionedShape bottomWall;
+	private PositionedShape bottomWall;
 
 	@JsonManagedReference("room-areas")
 	private final List<Area> areas;
@@ -43,10 +46,29 @@ public class Room extends Component {
 		areas = new ArrayList<>();
 		doors = new ArrayList<>();
 	}
-
-	public Room() {
-		this(null, null, null);
+	@JsonCreator
+	public Room(@JsonProperty("shape") RectangularShape shape,
+				@JsonProperty("name") String name,
+				@JsonProperty("areas") List<Area> areas,
+				@JsonProperty("doors") List<Door> doors) {
+		super(null, shape, name);
+		this.areas = areas != null ? areas : new ArrayList<>();
+		this.doors = doors != null ? doors : new ArrayList<>();
+		buildWalls();
 	}
+
+	@JsonIgnore
+	private void buildWalls() {
+		if (getShape() == null) return;
+		leftWall = new RectangularShape(getxCoordinate(), getyCoordinate(), WALL_THICKNESS, getHeight() + WALL_THICKNESS);
+		rightWall = new RectangularShape(getxCoordinate() + getWidth(), getyCoordinate(), WALL_THICKNESS, getHeight() + WALL_THICKNESS);
+		topWall = new RectangularShape(getxCoordinate(), getyCoordinate(), getWidth(), WALL_THICKNESS);
+		bottomWall = new RectangularShape(getxCoordinate(), getyCoordinate() + getHeight(), getWidth(), WALL_THICKNESS);
+	}
+
+	//	public Room() {
+	//		this(null, null, null);
+	//	}
 	protected boolean addArea(final Area area) {
 		if (area == null) return false;
 		return areas.add(area);
@@ -67,6 +89,7 @@ public class Room extends Component {
 
 	@Override
 	public boolean overlays(final PositionedShape shape) {
+		if (leftWall == null || rightWall == null || topWall == null || bottomWall == null) buildWalls();
 		return leftWall.overlays(shape) || rightWall.overlays(shape) || 
 			   topWall.overlays(shape) || bottomWall.overlays(shape);
 	}
@@ -78,7 +101,8 @@ public class Room extends Component {
 		if (overlayedDoor != null) {
 			return overlayedDoor.canBeOverlayed(shape);
 		}
-		
+
+		if (leftWall == null || rightWall == null || topWall == null || bottomWall == null) buildWalls();
 		if (leftWall.overlays(shape) || rightWall.overlays(shape) || 
 			topWall.overlays(shape) || bottomWall.overlays(shape)) {
 			return false;

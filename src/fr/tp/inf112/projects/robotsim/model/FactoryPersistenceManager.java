@@ -10,12 +10,17 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.util.logging.Logger;
 
+import com.sun.tools.javac.Main;
 import fr.tp.inf112.projects.canvas.model.Canvas;
 import fr.tp.inf112.projects.canvas.model.CanvasChooser;
 import fr.tp.inf112.projects.canvas.model.impl.AbstractCanvasPersistenceManager;
+import org.apache.commons.math3.analysis.function.Log;
 
 public class FactoryPersistenceManager extends AbstractCanvasPersistenceManager {
+
+	protected static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 	
 	public FactoryPersistenceManager(final CanvasChooser canvasChooser) {
 		super(canvasChooser);
@@ -32,7 +37,9 @@ public class FactoryPersistenceManager extends AbstractCanvasPersistenceManager 
 			final InputStream bufInputStream = new BufferedInputStream(fileInputStream);
 			final ObjectInputStream objectInputStream = new ObjectInputStream(bufInputStream);
 		) {
-			return (Canvas) objectInputStream.readObject();
+			Canvas c = (Canvas) objectInputStream.readObject();
+			LOGGER.info(c.getName() + c.getId() + " successfully read");
+			return c;
 		}
 		catch (ClassNotFoundException | IOException ex) {
 			throw new IOException(ex);
@@ -50,8 +57,9 @@ public class FactoryPersistenceManager extends AbstractCanvasPersistenceManager 
 			final OutputStream fileOutStream = new FileOutputStream(canvasModel.getId());
 			final OutputStream bufOutStream = new BufferedOutputStream(fileOutStream);
 			final ObjectOutputStream objOutStream = new ObjectOutputStream(bufOutStream);
-		) {	
+		) {
 			objOutStream.writeObject(canvasModel);
+			LOGGER.info(canvasModel.getName() + canvasModel.getId() + " successfully persisted");
 		}
 	}
 

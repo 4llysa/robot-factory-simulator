@@ -1,8 +1,14 @@
 package fr.tp.inf112.projects.robotsim.model;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serial;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.tp.inf112.projects.canvas.model.Style;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
 import fr.tp.inf112.projects.robotsim.model.shapes.RectangularShape;
@@ -15,6 +21,7 @@ public class Area extends Component {
 	@JsonIgnore
 	private static final Style STYLE = new ComponentStyle( ComponentStyle.DEFAULT_DASH_PATTERN );
 
+	@JsonManagedReference("area-machine")
 	private Machine machine;
 	@JsonBackReference("room-areas")
 	private Room room;

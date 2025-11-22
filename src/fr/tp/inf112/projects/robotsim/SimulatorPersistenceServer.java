@@ -1,14 +1,10 @@
-package fr.tp.inf112.projects.robotsim.model;
+package fr.tp.inf112.projects.robotsim;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.Reader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Logger;
@@ -16,6 +12,8 @@ import java.util.logging.Logger;
 import com.sun.tools.javac.Main;
 import fr.tp.inf112.projects.canvas.model.Canvas;
 import fr.tp.inf112.projects.canvas.view.FileCanvasChooser;
+import fr.tp.inf112.projects.robotsim.model.Factory;
+import fr.tp.inf112.projects.robotsim.model.FactoryPersistenceManager;
 
 public class SimulatorPersistenceServer {
     static final FileCanvasChooser canvasChooser = new FileCanvasChooser("factory", "Puck Factory");
@@ -55,10 +53,12 @@ class RequestProcessor implements Runnable {
             Object o = objInStream.readObject();
             if (o instanceof String) {
                 // read with if o
+                LOGGER.info("Request to read " + o);
                 Canvas canvas = factoryPersistenceManager.read((String) o);
                 objectOutputStream.writeObject(canvas);
             } else if (o instanceof Factory) {
                 // persist factory
+                LOGGER.info("Request to persist " + ((Factory) o).getName() + " " + ((Factory) o).getId());
                 factoryPersistenceManager.persist((Factory) o);
             }
         } catch (Exception e) {

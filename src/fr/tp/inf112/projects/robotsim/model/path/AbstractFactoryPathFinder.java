@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.tp.inf112.projects.robotsim.model.Factory;
 import fr.tp.inf112.projects.robotsim.model.Position;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
@@ -17,8 +19,10 @@ public abstract class AbstractFactoryPathFinder<Graph, Vertex> implements Factor
 	 */
 	private static final long serialVersionUID = 3864762720560889146L;
 
-	private final Factory factoryModel;
+	@JsonIgnore
+	private Factory factoryModel;
 	
+	@JsonProperty
 	private final int resolution;
 	
 	private transient Graph graph;
@@ -29,9 +33,16 @@ public abstract class AbstractFactoryPathFinder<Graph, Vertex> implements Factor
 		this.resolution = resolution;
 		graph = null;
 	}
+	public AbstractFactoryPathFinder() {
+		this(null,0);
+	}
 
 	public Factory getFactoryModel() {
 		return factoryModel;
+	}
+
+	public void setFactoryModel(Factory f) {
+		factoryModel = f;
 	}
 
 	public int getResolution() {

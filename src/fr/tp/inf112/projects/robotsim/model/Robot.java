@@ -9,13 +9,18 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.tp.inf112.projects.canvas.model.Style;
 import fr.tp.inf112.projects.canvas.model.impl.RGBColor;
 import fr.tp.inf112.projects.robotsim.model.motion.Motion;
+import fr.tp.inf112.projects.robotsim.model.path.AbstractFactoryPathFinder;
+import fr.tp.inf112.projects.robotsim.model.path.CustomDijkstraFactoryPathFinder;
 import fr.tp.inf112.projects.robotsim.model.path.FactoryPathFinder;
+import fr.tp.inf112.projects.robotsim.model.path.JGraphTDijkstraFactoryPathFinder;
 import fr.tp.inf112.projects.robotsim.model.shapes.CircularShape;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
 import fr.tp.inf112.projects.robotsim.model.shapes.RectangularShape;
+import org.apache.commons.math3.analysis.function.Abs;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Robot extends Component {
@@ -26,10 +31,12 @@ public class Robot extends Component {
 
 	private static final Style BLOCKED_STYLE = new ComponentStyle(RGBColor.RED, RGBColor.BLACK, 3.0f, new float[]{4.0f});
 
-	private final Battery battery;
+	@JsonProperty
+	private Battery battery;
 	
 	private int speed;
 	
+	@JsonProperty
 	private List<Component> targetComponents;
 	
 	private transient Iterator<Component> targetComponentsIterator;
@@ -42,7 +49,8 @@ public class Robot extends Component {
 	
 	private Position memorizedTargetPosition;
 	
-	private FactoryPathFinder pathFinder;
+	@JsonProperty
+	private AbstractFactoryPathFinder pathFinder;
 
 	public Robot(final Factory factory,
 				 final FactoryPathFinder pathFinder,
@@ -50,8 +58,8 @@ public class Robot extends Component {
 				 final Battery battery,
 				 final String name ) {
 		super(factory, shape, name);
-		
-		this.pathFinder = pathFinder;
+
+		this.pathFinder = (AbstractFactoryPathFinder) pathFinder;
 		
 		this.battery = battery;
 		
@@ -69,7 +77,7 @@ public class Robot extends Component {
 
 	@Override
 	public String toString() {
-		return super.toString() + " battery=" + battery + "]";
+		return super.toString() + " battery=" + battery + " targetComponents=" + targetComponents + "]";
 	}
 
 	protected int getSpeed() {
@@ -139,6 +147,7 @@ public class Robot extends Component {
 			return displacement;
 		} else if (isLivelyLocked()) {
 			final Position freeNeighbouringPosition = findFreeNeighbouringPosition();
+			LOGGER.info("found free position " + freeNeighbouringPosition.toString());
 			if (freeNeighbouringPosition != null) {
 				Motion evasiveMotion = new Motion(getPosition(), freeNeighbouringPosition);
 				getFactory().moveComponent(evasiveMotion, this);
@@ -166,18 +175,17 @@ public class Robot extends Component {
 
 			Position newPosition = new Position(xCoord + dX, yCoord + dY);
 
-			if (getFactory().getMobileComponentAt(newPosition, this) == null) {
+			if (getFactory().getMobileComponentAt(newPosition, this) == null
+					&&!getFactory().hasObstacleAt(newPosition)) {
 				return newPosition;
 			}
-
-//			if (!getFactory().hasObstacleAt(newPosition)) {
-//				return newPosition;
-//			}
 		}
-		return null;
+		LOGGER.warning("free position not found, trying again");
+		return findFreeNeighbouringPosition();
 	}
-	
+
 	private void computePathToCurrentTargetComponent() {
+		if (pathFinder.getFactoryModel() == null || !pathFinder.getFactoryModel().equals(this.getFactory())) pathFinder.setFactoryModel(this.getFactory());
 		final List<Position> currentPathPositions = pathFinder.findPath(this, currTargetComponent);
 		currentPathPositionsIter = currentPathPositions.iterator();
 	}
@@ -219,6 +227,7 @@ public class Robot extends Component {
 		return this.memorizedTargetPosition == null ? currentPathPositionsIter.next() : this.memorizedTargetPosition;
 	}
 	
+	@JsonIgnore
 	public boolean isLivelyLocked() {
 	    if (memorizedTargetPosition == null) {
 	        return false;

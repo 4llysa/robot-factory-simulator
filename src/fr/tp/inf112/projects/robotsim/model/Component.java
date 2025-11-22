@@ -6,13 +6,16 @@ import java.util.logging.Logger;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sun.tools.javac.Main;
 import fr.tp.inf112.projects.canvas.model.Figure;
 import fr.tp.inf112.projects.canvas.model.Shape;
 import fr.tp.inf112.projects.canvas.model.Style;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
 import static java.lang.Thread.sleep;
+import org.apache.commons.math3.analysis.function.Log;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class Component implements Figure, Serializable, Runnable {
 
 	private static final long serialVersionUID = -5960950869184030220L;
@@ -25,6 +28,7 @@ public abstract class Component implements Figure, Serializable, Runnable {
 	private PositionedShape positionedShape;
 
 	private String name;
+
 	@JsonIgnore
 	protected transient Logger LOGGER = Logger.getLogger(Main.class.getName());
 
@@ -46,7 +50,7 @@ public abstract class Component implements Figure, Serializable, Runnable {
 	}
 	@Override
 	public void run() {
-		while (isSimulationStarted()) {
+		while (factory.isSimulationStarted()) {
 			behave();
 			try {
 				sleep(100);
@@ -179,12 +183,11 @@ public abstract class Component implements Figure, Serializable, Runnable {
 		return getPositionedShape();
 	}
 
-	@JsonIgnore
-	public boolean isSimulationStarted() {
-		final Factory factory = getFactory();
-		if (factory == null) return false;
-		return factory.isSimulationStarted();
-	}
+//	public boolean isSimulationStarted() {
+//		final Factory factory = getFactory();
+//		if (factory == null) return false;
+//		return factory.isSimulationStarted();
+//	}
 	@Serial
 	protected void restoreTransientFields() {
 		LOGGER = Logger.getLogger(Main.class.getName());

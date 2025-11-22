@@ -3,6 +3,7 @@ package fr.tp.inf112.projects.robotsim.app;
 import java.awt.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
@@ -48,7 +49,7 @@ public class SimulatorApplication {
 		new Door(room2, Room.WALL.LEFT, 10, 20, true, "Entrance");
 		final Area area2 = new Area(room2, new RectangularShape( 135, 35, 50, 50 ), "Production Area 2");
 		final Machine machine2 = new Machine(area2, new RectangularShape( 150, 50, 15, 15 ), "Machine 2");
-		
+
 		final int baselineSize = 3;
 		final int xCoordinate = 10;
 		final int yCoordinate = 165;
@@ -64,8 +65,8 @@ public class SimulatorApplication {
 		conveyorShape.addVertex(new BasicVertex(xCoordinate - baselineSize, yCoordinate + height - baselineSize));
 		conveyorShape.addVertex(new BasicVertex(xCoordinate, yCoordinate + height - baselineSize));
 
-		final Room chargingRoom = new Room(factory, new RectangularShape(125, 125, 50, 50), "Charging Room");
-		new Door(chargingRoom, Room.WALL.RIGHT, 10, 20, false, "Entrance");
+		final Room chargingRoom = new Room(factory, new RectangularShape(85, 125, 50, 50), "Charging Room");
+		new Door(chargingRoom, Room.WALL.RIGHT, 10, 20, true, "Entrance");
 		final ChargingStation chargingStation = new ChargingStation(factory, new RectangularShape(150, 145, 15, 15), "Charging Station");
 
 		final FactoryPathFinder jgraphPahtFinder = new JGraphTDijkstraFactoryPathFinder(factory, 5);
@@ -77,18 +78,44 @@ public class SimulatorApplication {
 
 		final FactoryPathFinder customPathFinder = new CustomDijkstraFactoryPathFinder(factory, 5);
 		final Robot robot2 = new Robot(factory, customPathFinder, new CircularShape(45, 5, 2), new Battery(10), "Robot 2");
-		robot2.addTargetComponent(machine1);
+//		robot2.addTargetComponent(machine1);
+//		robot2.addTargetComponent(machine2);
+//		robot2.addTargetComponent(machine1);
+		robot2.addTargetComponent(chargingStation);
 		robot2.addTargetComponent(machine2);
-		robot2.addTargetComponent(machine1);
-		robot2.addTargetComponent(machine2);
-        robot2.addTargetComponent(chargingStation);
-		robot2.addTargetComponent(new Conveyor(factory, conveyorShape, "Conveyor 1"));
 
+		robot2.addTargetComponent(new Conveyor(factory, conveyorShape, "Conveyor 1"));
+//		factory.setId(factory.getName() + LocalDateTime.now() + ".factory");
+
+//		SwingUtilities.invokeLater(() -> {
+//			final MyFileCanvasChooser canvasChooser = new MyFileCanvasChooser("factory", "Puck Factory");
+//			final CanvasViewer factoryViewer;
+//
+//			// Create a temporary viewer placeholder with a dummy controller (if allowed)
+//			// Or delay creating the viewer until after manager is ready
+//			new Thread(() -> {
+//				try {
+//					final RemoteFactoryPersistenceManager persistenceManager =
+//							new RemoteFactoryPersistenceManager(canvasChooser,
+//									InetAddress.getByName("localhost"),
+//									666);
+//
+//					// Now create the viewer on the EDT
+//					SwingUtilities.invokeLater(() -> {
+//						final SimulatorController controller =
+//								new SimulatorController(factory, persistenceManager);
+//						final CanvasViewer viewer = new CanvasViewer(controller);
+//						canvasChooser.setViewer(viewer);
+//					});
+//				} catch (UnknownHostException e) {
+//					e.printStackTrace();
+//				}
+//			}).start();
+//		});
 		SwingUtilities.invokeLater(new Runnable() {
-			  
 			@Override
 	        public void run() {
-				final FileCanvasChooser canvasChooser = new FileCanvasChooser("factory", "Puck Factory");
+				final FileCanvasChooser canvasChooser = new MyFileCanvasChooser("factory", "Puck Factory");
 				InetAddress netAddr;
 				int port = 666;
 				try {
@@ -96,9 +123,10 @@ public class SimulatorApplication {
 				} catch (UnknownHostException e) {
 					throw new RuntimeException(e);
 				}
-				final Component factoryViewer = new CanvasViewer(new SimulatorController(factory, new RemoteFactoryPersistenceManager(canvasChooser, netAddr, port)));
+				final Component factoryViewer = new CanvasViewer(new RemoteSimulatorController(factory, new RemoteFactoryPersistenceManager(canvasChooser, netAddr, port)));
 				canvasChooser.setViewer(factoryViewer);
 			}
 		});
 	}
 }
+// -Dswing.defaultlaf=javax.swing.plaf.metal.MetalLookAndFeel

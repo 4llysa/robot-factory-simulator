@@ -1,5 +1,10 @@
 package fr.tp.inf112.projects.robotsim.model;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serial;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
 import fr.tp.inf112.projects.robotsim.model.shapes.RectangularShape;
@@ -8,12 +13,13 @@ import fr.tp.inf112.projects.robotsim.model.shapes.RectangularShape;
 public class Machine extends Component {
 
 	private static final long serialVersionUID = -1568908860712776436L;
-
+	@JsonBackReference("area-machine")
+	private Area area;
 	public Machine(final Area area,
 				   final RectangularShape shape,
 				   final String name) {
 		super(area.getFactory(), shape, name);
-		
+
 		area.setMachine(this);
 	}
 
