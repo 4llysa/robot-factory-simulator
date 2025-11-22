@@ -65,7 +65,7 @@ public class SimulatorApplication {
 		conveyorShape.addVertex(new BasicVertex(xCoordinate - baselineSize, yCoordinate + height - baselineSize));
 		conveyorShape.addVertex(new BasicVertex(xCoordinate, yCoordinate + height - baselineSize));
 
-		final Room chargingRoom = new Room(factory, new RectangularShape(85, 125, 50, 50), "Charging Room");
+		final Room chargingRoom = new Room(factory, new RectangularShape(125, 125, 50, 50), "Charging Room");
 		new Door(chargingRoom, Room.WALL.RIGHT, 10, 20, true, "Entrance");
 		final ChargingStation chargingStation = new ChargingStation(factory, new RectangularShape(150, 145, 15, 15), "Charging Station");
 
@@ -85,33 +85,7 @@ public class SimulatorApplication {
 		robot2.addTargetComponent(machine2);
 
 		robot2.addTargetComponent(new Conveyor(factory, conveyorShape, "Conveyor 1"));
-//		factory.setId(factory.getName() + LocalDateTime.now() + ".factory");
 
-//		SwingUtilities.invokeLater(() -> {
-//			final MyFileCanvasChooser canvasChooser = new MyFileCanvasChooser("factory", "Puck Factory");
-//			final CanvasViewer factoryViewer;
-//
-//			// Create a temporary viewer placeholder with a dummy controller (if allowed)
-//			// Or delay creating the viewer until after manager is ready
-//			new Thread(() -> {
-//				try {
-//					final RemoteFactoryPersistenceManager persistenceManager =
-//							new RemoteFactoryPersistenceManager(canvasChooser,
-//									InetAddress.getByName("localhost"),
-//									666);
-//
-//					// Now create the viewer on the EDT
-//					SwingUtilities.invokeLater(() -> {
-//						final SimulatorController controller =
-//								new SimulatorController(factory, persistenceManager);
-//						final CanvasViewer viewer = new CanvasViewer(controller);
-//						canvasChooser.setViewer(viewer);
-//					});
-//				} catch (UnknownHostException e) {
-//					e.printStackTrace();
-//				}
-//			}).start();
-//		});
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 	        public void run() {
@@ -129,4 +103,3 @@ public class SimulatorApplication {
 		});
 	}
 }
-// -Dswing.defaultlaf=javax.swing.plaf.metal.MetalLookAndFeel

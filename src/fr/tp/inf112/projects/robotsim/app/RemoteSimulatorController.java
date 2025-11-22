@@ -12,6 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
@@ -31,7 +32,9 @@ public class RemoteSimulatorController extends SimulatorController {
     HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper;
     private Thread updateThread;
+    private boolean isAnimationRunning = false;
     protected transient Logger LOGGER = Logger.getLogger(Main.class.getName());
+    private transient FactorySimulationEventConsumer eventConsumer;
 
     public RemoteSimulatorController(Factory factoryModel, CanvasPersistenceManager persistenceManager) {
         super(factoryModel, persistenceManager);
@@ -43,8 +46,8 @@ public class RemoteSimulatorController extends SimulatorController {
                 .allowIfSubType(ArrayList.class.getName())
                 .allowIfSubType(LinkedHashSet.class.getName())
                 .build();
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.activateDefaultTyping(typeValidator, ObjectMapper.DefaultTyping.NON_FINAL);
+        objectMapper = new ObjectMapper();
+        objectMapper.activateDefaultTyping(typeValidator, ObjectMapper.DefaultTyping.NON_FINAL);
     }
 
     @Override
@@ -69,18 +72,20 @@ public class RemoteSimulatorController extends SimulatorController {
             LOGGER.info("STATUS CODE: " + response.statusCode());
             if (response.statusCode() != 200) throw new RuntimeException("Error starting animation");
             LOGGER.info(response.body());
-            updateThread = new Thread(this::updateViewer);
-            LOGGER.info("Starting update thread for " + getCanvas().getId());
-            updateThread.start();
+//            updateThread = new Thread(this::updateViewer);
+//            LOGGER.info("Starting update thread for " + getCanvas().getId());
+//            updateThread.start();
         } catch (InterruptedException | URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }
+        isAnimationRunning = true;
+        eventConsumer = new FactorySimulationEventConsumer(this);
+        updateThread = new Thread(eventConsumer::consumeMessages);
+        updateThread.start();
+
     }
     @Override
     public void stopAnimation() {
-        if (updateThread != null) updateThread.interrupt();
-        else LOGGER.warning("updateThread should not be null");
-
         final URI uri;
         try {
             uri = new URI("http", null, "localhost", 8080, "/end",
@@ -90,18 +95,29 @@ public class RemoteSimulatorController extends SimulatorController {
             if (response.statusCode() != 200) throw new RuntimeException("Error stopping animation");
             String jsonResponse = response.body();
             Factory finalFactory = this.objectMapper.readValue(jsonResponse, Factory.class);
-            setCanvas(finalFactory);
+            if (finalFactory != null) setCanvas(finalFactory);
+            if (finalFactory == null) throw new RuntimeException("why null?? ");
         } catch (InterruptedException | URISyntaxException | IOException e) {
             LOGGER.warning("Error stopping animation: " + e);
             throw new RuntimeException(e);
         }
+
+        isAnimationRunning = false;
+        if (updateThread != null) {
+            eventConsumer.terminate();
+            try {
+                updateThread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else LOGGER.warning("updateThread should not be null");
+
     }
     @Override
     public boolean isAnimationRunning() {
-        if (updateThread == null) return false;
-        return !updateThread.isInterrupted();
+        return isAnimationRunning;
     }
-
 
     private Factory getFactory() throws  InterruptedException, URISyntaxException, IOException {
         final URI uri;
@@ -122,19 +138,28 @@ public class RemoteSimulatorController extends SimulatorController {
         }
         ((Factory) getCanvas()).notifyObservers();
     }
-    private void updateViewer() {
-        LOGGER.warning("THREAD STARTED: " + Thread.currentThread().getName());
-        LOGGER.info("Update viewer thread started");
+
+//    private void updateViewer() {
+//        LOGGER.warning("THREAD STARTED: " + Thread.currentThread().getName());
+//        LOGGER.info("Update viewer thread started");
+//        try {
+//            Factory factory = getFactory();
+//            while (!updateThread.isInterrupted() && factory.isSimulationStarted()) {
+//                factory = getFactory();
+//                setCanvas(factory);
+//                Thread.sleep(100);
+//            }
+//        } catch (InterruptedException | URISyntaxException | IOException e) {
+//            Thread.currentThread().interrupt();
+//            LOGGER.info("Update viewer stopped");
+//        }
+//    }
+
+    public void setCanvas(String jsonString) {
         try {
-            Factory factory = getFactory();
-            while (!updateThread.isInterrupted() && factory.isSimulationStarted()) {
-                factory = getFactory();
-                setCanvas(factory);
-                Thread.sleep(100);
-            }
-        } catch (InterruptedException | URISyntaxException | IOException e) {
-            Thread.currentThread().interrupt();
-            LOGGER.info("Update viewer stopped");
+            this.setCanvas(this.objectMapper.readValue(jsonString, Factory.class));
+        } catch (JsonProcessingException e) {
+            LOGGER.severe("JSONString does not represent Factory" + jsonString);
         }
     }
 }

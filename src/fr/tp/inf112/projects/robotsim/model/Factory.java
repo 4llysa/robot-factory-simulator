@@ -27,13 +27,12 @@ public class Factory extends Component implements Canvas, Observable {
 	private static final long serialVersionUID = 5156526483612458192L;
 
 	private static final ComponentStyle DEFAULT = new ComponentStyle(5.0f);
-//	protected transient final Logger LOGGER = Logger.getLogger(Main.class.getName());
+
+	@JsonIgnore
+	private transient FactoryModelChangedNotifier notifier;
 
 	@JsonManagedReference("factory-components")
 	private final List<Component> components;
-
-	@JsonIgnore
-	private transient List<Observer> observers;
 
 	@JsonProperty
 	private boolean simulationStarted;
@@ -43,42 +42,36 @@ public class Factory extends Component implements Canvas, Observable {
 				   final String name ) {
 		super(null, new RectangularShape(0, 0, width, height), name);
 
+		notifier = new StandardModelNotifier();
 		components = new ArrayList<>();
-		observers = null;
 		simulationStarted = false;
 	}
 
 	public Factory() {
 		this(-1, -1, null);
 	}
+	@JsonIgnore
 	public List<Observer> getObservers() {
-		if (observers == null) {
-			observers = new ArrayList<>();
-		}
-
-		return observers;
+		return notifier.getObservers().stream().toList();
 	}
 
 	@Override
 	public boolean addObserver(Observer observer) {
-		return getObservers().add(observer);
+		return notifier.addObserver(observer);
 	}
 
 	@Override
 	public boolean removeObserver(Observer observer) {
-		return getObservers().remove(observer);
+		return notifier.removeObserver(observer);
 	}
 
 	public void notifyObservers() {
-		for (final Observer observer : getObservers()) {
-			observer.modelChanged();
-		}
+		notifier.notifyObservers();
 	}
 
 	public boolean addComponent(final Component component) {
 		if (components.add(component)) {
 			notifyObservers();
-
 			return true;
 		}
 
@@ -88,7 +81,6 @@ public class Factory extends Component implements Canvas, Observable {
 	public boolean removeComponent(final Component component) {
 		if (components.remove(component)) {
 			notifyObservers();
-
 			return true;
 		}
 
@@ -215,8 +207,12 @@ public class Factory extends Component implements Canvas, Observable {
 	private void readObject(ObjectInputStream in)
 			throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
-		if (observers == null) observers = new ArrayList<>();
 		if (threads == null) threads = new ArrayList<>();
+		setNotifier(new StandardModelNotifier());
 		restoreTransientFields();
+	}
+
+	public void setNotifier(FactoryModelChangedNotifier notifier) {
+		this.notifier = notifier;
 	}
 }
