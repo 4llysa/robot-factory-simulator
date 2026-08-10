@@ -92,6 +92,7 @@ public class RemoteSimulatorController extends SimulatorController {
                     "id=" + getCanvas().getId(), null);
             HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().build();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            LOGGER.info("STATUS CODE: " + response.statusCode());
             if (response.statusCode() != 200) throw new RuntimeException("Error stopping animation");
             String jsonResponse = response.body();
             Factory finalFactory = this.objectMapper.readValue(jsonResponse, Factory.class);

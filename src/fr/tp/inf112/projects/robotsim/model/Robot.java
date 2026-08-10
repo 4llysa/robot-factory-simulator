@@ -14,13 +14,10 @@ import fr.tp.inf112.projects.canvas.model.Style;
 import fr.tp.inf112.projects.canvas.model.impl.RGBColor;
 import fr.tp.inf112.projects.robotsim.model.motion.Motion;
 import fr.tp.inf112.projects.robotsim.model.path.AbstractFactoryPathFinder;
-import fr.tp.inf112.projects.robotsim.model.path.CustomDijkstraFactoryPathFinder;
 import fr.tp.inf112.projects.robotsim.model.path.FactoryPathFinder;
-import fr.tp.inf112.projects.robotsim.model.path.JGraphTDijkstraFactoryPathFinder;
 import fr.tp.inf112.projects.robotsim.model.shapes.CircularShape;
 import fr.tp.inf112.projects.robotsim.model.shapes.PositionedShape;
 import fr.tp.inf112.projects.robotsim.model.shapes.RectangularShape;
-import org.apache.commons.math3.analysis.function.Abs;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Robot extends Component {
@@ -162,11 +159,12 @@ public class Robot extends Component {
 		Position currPosition = getPosition();
 		int xCoord = currPosition.getxCoordinate();
 		int yCoord = currPosition.getyCoordinate();
+		int resolution = this.pathFinder.getResolution();
 		int[][] directions = {
-				{-5, 0},
-				{0, 5},
-				{5, 0},
-				{0, -5}
+				{-resolution, 0},
+				{0, resolution},
+				{resolution, 0},
+				{0, -resolution}
 		};
 
 		for (int[] direction : directions) {
@@ -238,7 +236,7 @@ public class Robot extends Component {
 
 	    if (otherComponent instanceof Robot)  {
 		    boolean ret = getPosition().equals(((Robot) otherComponent).getMemorizedTargetPosition()) || ((Robot) otherComponent).blocked;
-			if (ret) System.out.println(getName() + " is livelocked");
+			if (ret) LOGGER.info(getName() + " is livelocked");
 			return ret;
 	    }
 	    return false;
